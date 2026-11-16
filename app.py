@@ -2,8 +2,6 @@ import json
 import numpy as np, pandas as pd, cv2, joblib
 import streamlit as st
 from skimage.feature import graycomatrix, graycoprops, hog
-from streamlit_cropper import st_cropper
-from PIL import Image
 
 st.set_page_config(page_title='Klasifikasi Gambar')
 
@@ -78,24 +76,7 @@ if up:
 
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    # ===== FITUR CROP GAMBAR =====
-    st.subheader("Crop Gambar Tulisan")
-
-    cropped_image = st_cropper(
-        Image.fromarray(rgb),
-        realtime_update=True,
-        box_color="#00AEEF",
-        aspect_ratio=None,
-        return_type="image"
-    )
-
-    # Ubah hasil crop menjadi array RGB
-    crop_rgb = np.array(cropped_image)
-
-    st.image(crop_rgb, caption="Hasil Crop")
-
-    # ===== PREPROCESSING HASIL CROP =====
-    proc = letterbox(normalize_bg(crop_rgb))
+    proc = letterbox(normalize_bg(rgb))
 
     st.image(rgb, caption='Gambar asli')
     st.image(proc, caption='Setelah preprocessing')
