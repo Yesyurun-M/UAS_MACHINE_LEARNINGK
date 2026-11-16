@@ -6,3 +6,4 @@ scikit-image
 scikit-learn
 joblib
 tensorflow-cpu
+streamlit-cropper
