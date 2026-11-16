@@ -2,8 +2,10 @@ import json
 import numpy as np, pandas as pd, cv2, joblib
 import streamlit as st
 from skimage.feature import graycomatrix, graycoprops, hog
+from streamlit_cropper import st_cropper
+from PIL import Image
 
-st.set_page_config(page_title='Klasifikasi Gambar', page_icon='🔍')
+st.set_page_config(page_title='Klasifikasi Gambar')
 
 
 # ===== Load model (sekali saja, disimpan di cache) =====
@@ -62,18 +64,38 @@ def ekstrak_fitur(img):
 
 
 # ===== Tampilan =====
-st.title('🔍 Klasifikasi Gambar')
+st.title('Klasifikasi Gambar')
 st.write('Upload gambar, model akan menebak kelasnya beserta **confident value**.')
 
 th = st.slider('Batas minimal confidence', 0.0, 1.0, 0.5, 0.05)
 up = st.file_uploader('Upload gambar', type=['jpg', 'jpeg', 'png'])
 
+
 if up:
     img = cv2.imdecode(np.frombuffer(up.read(), np.uint8), cv2.IMREAD_COLOR)
     if img is None:
         st.error('Gambar tidak bisa dibaca.'); st.stop()
+
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    proc = letterbox(normalize_bg(rgb))
+
+    # ===== FITUR CROP GAMBAR =====
+    st.subheader("Crop Gambar Tulisan")
+
+    cropped_image = st_cropper(
+        Image.fromarray(rgb),
+        realtime_update=True,
+        box_color="#00AEEF",
+        aspect_ratio=None,
+        return_type="image"
+    )
+
+    # Ubah hasil crop menjadi array RGB
+    crop_rgb = np.array(cropped_image)
+
+    st.image(crop_rgb, caption="Hasil Crop")
+
+    # ===== PREPROCESSING HASIL CROP =====
+    proc = letterbox(normalize_bg(crop_rgb))
 
     st.image(rgb, caption='Gambar asli')
     st.image(proc, caption='Setelah preprocessing')
